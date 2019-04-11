@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/johann01/testing-quickstart-python:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/johann01/testing-quickstart-python:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: testing-quickstart-python
+        chartPath: charts/testing-quickstart-python
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/johann01/testing-quickstart-python'
+          image.tag: '{{.DIGEST_HEX}}'
